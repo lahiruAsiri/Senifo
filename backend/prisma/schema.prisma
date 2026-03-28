@@ -1,0 +1,392 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  SUPER_ADMIN
+  CLIENT_COORDINATOR
+  DESIGNER
+  PRODUCTION
+  PAYMENT_MANAGER
+}
+
+enum OrderStatus {
+  PENDING
+  DESIGN_QUEUE
+  DESIGNING
+  DESIGN_REVIEW
+  DESIGN_APPROVED
+  PRODUCTION_QUEUE
+  IN_PRODUCTION
+  PRODUCTION_REVIEW
+  QUALITY_CHECK
+  PAYMENT_PENDING
+  PAYMENT_CLEARED
+  COMPLETED
+  CANCELLED
+}
+
+enum TicketStatus {
+  OPEN
+  AWAITING_CLIENT
+  CLIENT_RESPONDED
+  RESOLVED
+  CLOSED
+}
+
+enum TicketType {
+  DESIGN_APPROVAL
+  DESIGN_CHANGE
+  PRODUCTION_ISSUE
+  PAYMENT_QUERY
+  GENERAL
+}
+
+enum PaymentType {
+  INCOME
+  EXPENSE
+}
+
+enum PrintType {
+  SCREEN_PRINT
+  DTG
+  EMBROIDERY
+  VINYL
+  SUBLIMATION
+  HEAT_TRANSFER
+}
+
+model User {
+  id           String    @id @default(cuid())
+  email        String    @unique
+  name         String
+  phone        String?
+  passwordHash String
+  role         Role
+  isActive     Boolean   @default(true)
+  avatar       String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  lastLoginAt  DateTime?
+
+  ordersCoordinated Order[]         @relation("CoordinatorOrders")
+  ordersDesigned    Order[]         @relation("DesignerOrders")
+  ordersProduced    Order[]         @relation("ProductionOrders")
+  ticketsRaised     Ticket[]        @relation("RaisedByUser")
+  ticketsAssigned   Ticket[]        @relation("AssignedToUser")
+  ticketComments    TicketComment[]
+  auditLogs         AuditLog[]
+  stageExpenses     StageExpense[]
+  sessions          Session[]
+
+  @@index([role])
+  @@index([email])
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([token])
+  @@index([userId])
+}
+
+model Client {
+  id        String   @id @default(cuid())
+  name      String
+  phone     String
+  whatsapp  String?
+  email     String?
+  company   String?
+  address   String?
+  notes     String?
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  orders Order[]
+
+  @@index([phone])
+  @@index([name])
+}
+
+model PrintingService {
+  id          String    @id @default(cuid())
+  name        String
+  printType   PrintType
+  description String?
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  pricingTiers PricingTier[]
+  orders       Order[]
+}
+
+model PricingTier {
+  id                String   @id @default(cuid())
+  serviceId         String
+  minQuantity       Int
+  maxQuantity       Int?
+  pricePerUnit      Decimal  @db.Decimal(10, 2)
+  actualCostPerUnit Decimal  @db.Decimal(10, 2)
+  deliveryCostFlat  Decimal  @db.Decimal(10, 2) @default(0)
+  isActive          Boolean  @default(true)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  service PrintingService @relation(fields: [serviceId], references: [id])
+
+  @@index([serviceId])
+}
+
+model MonthlyCapacity {
+  id            String   @id @default(cuid())
+  year          Int
+  month         Int
+  maxUnits      Int
+  maxOrders     Int
+  reservedUnits Int      @default(0)
+  bookedUnits   Int      @default(0)
+  notes         String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@unique([year, month])
+  @@index([year, month])
+}
+
+model Order {
+  id               String      @id @default(cuid())
+  orderNumber      String      @unique
+  clientId         String
+  serviceId        String
+  coordinatorId    String
+  designerId       String?
+  productionUserId String?
+  status           OrderStatus @default(PENDING)
+  quantity         Int
+  tshirtType       String
+  sizes            Json
+  colors           Json
+  description      String?
+  specialNotes     String?
+  whatsappMsgId    String?
+  sourceChannel    String      @default("WHATSAPP")
+  unitPrice        Decimal     @db.Decimal(10, 2)
+  totalAmount      Decimal     @db.Decimal(10, 2)
+  actualCost       Decimal?    @db.Decimal(10, 2)
+  profit           Decimal?    @db.Decimal(10, 2)
+  discountAmount   Decimal     @db.Decimal(10, 2) @default(0)
+  paidAmount       Decimal     @db.Decimal(10, 2) @default(0)
+  balanceAmount    Decimal?    @db.Decimal(10, 2)
+  orderDate        DateTime    @default(now())
+  expectedDelivery DateTime?
+  actualDelivery   DateTime?
+  estimatedDays    Int?
+  invoiceUrl       String?
+  invoiceNumber    String?     @unique
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+
+  client          Client          @relation(fields: [clientId], references: [id])
+  service         PrintingService @relation(fields: [serviceId], references: [id])
+  coordinator     User            @relation("CoordinatorOrders", fields: [coordinatorId], references: [id])
+  designer        User?           @relation("DesignerOrders", fields: [designerId], references: [id])
+  productionUser  User?           @relation("ProductionOrders", fields: [productionUserId], references: [id])
+  orderImages     OrderImage[]
+  stageLogs       OrderStageLog[]
+  tickets         Ticket[]
+  payments        Payment[]
+  stageExpenses   StageExpense[]
+  capacitySlot    CapacityBooking?
+
+  @@index([status])
+  @@index([clientId])
+  @@index([coordinatorId])
+  @@index([designerId])
+  @@index([orderDate])
+  @@index([orderNumber])
+}
+
+model OrderImage {
+  id         String   @id @default(cuid())
+  orderId    String
+  url        String
+  bucket     String
+  objectKey  String
+  fileName   String
+  fileSize   Int
+  mimeType   String
+  category   String
+  uploadedBy String
+  createdAt  DateTime @default(now())
+
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([orderId])
+}
+
+model OrderStageLog {
+  id         String       @id @default(cuid())
+  orderId    String
+  fromStatus OrderStatus?
+  toStatus   OrderStatus
+  changedBy  String
+  notes      String?
+  createdAt  DateTime     @default(now())
+
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([orderId])
+}
+
+model Ticket {
+  id           String       @id @default(cuid())
+  orderId      String
+  raisedById   String
+  assignedToId String?
+  type         TicketType
+  status       TicketStatus @default(OPEN)
+  title        String
+  description  String
+  priority     String       @default("MEDIUM")
+  resolvedAt   DateTime?
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  order       Order              @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  raisedBy    User               @relation("RaisedByUser", fields: [raisedById], references: [id])
+  assignedTo  User?              @relation("AssignedToUser", fields: [assignedToId], references: [id])
+  comments    TicketComment[]
+  attachments TicketAttachment[]
+
+  @@index([orderId])
+  @@index([status])
+  @@index([raisedById])
+}
+
+model TicketComment {
+  id         String   @id @default(cuid())
+  ticketId   String
+  userId     String
+  content    String
+  isInternal Boolean  @default(false)
+  createdAt  DateTime @default(now())
+
+  ticket Ticket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id])
+
+  @@index([ticketId])
+}
+
+model TicketAttachment {
+  id        String   @id @default(cuid())
+  ticketId  String
+  url       String
+  fileName  String
+  fileSize  Int
+  mimeType  String
+  createdAt DateTime @default(now())
+
+  ticket Ticket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+
+  @@index([ticketId])
+}
+
+model Payment {
+  id          String      @id @default(cuid())
+  orderId     String
+  type        PaymentType
+  amount      Decimal     @db.Decimal(10, 2)
+  method      String?
+  reference   String?
+  notes       String?
+  recordedBy  String
+  paymentDate DateTime    @default(now())
+  createdAt   DateTime    @default(now())
+
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([orderId])
+  @@index([paymentDate])
+}
+
+model StageExpense {
+  id             String      @id @default(cuid())
+  orderId        String
+  stage          OrderStatus
+  description    String
+  amount         Decimal     @db.Decimal(10, 2)
+  recordedBy     String
+  receiptUrl     String?
+  createdAt      DateTime    @default(now())
+
+  order          Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  recordedByUser User  @relation(fields: [recordedBy], references: [id])
+
+  @@index([orderId])
+  @@index([stage])
+}
+
+model CapacityBooking {
+  id        String   @id @default(cuid())
+  orderId   String   @unique
+  year      Int
+  month     Int
+  units     Int
+  createdAt DateTime @default(now())
+
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([year, month])
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  userId     String
+  action     String
+  entityType String
+  entityId   String
+  metadata   Json?
+  ipAddress  String?
+  createdAt  DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([entityType, entityId])
+  @@index([createdAt])
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  title     String
+  body      String
+  type      String
+  entityId  String?
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([userId, isRead])
+  @@index([createdAt])
+}
+
+model OrderCounter {
+  id    String @id @default("singleton")
+  year  Int
+  count Int    @default(0)
+}
