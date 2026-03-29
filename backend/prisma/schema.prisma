@@ -82,6 +82,7 @@ model User {
   ticketComments    TicketComment[]
   auditLogs         AuditLog[]
   stageExpenses     StageExpense[]
+  stageLogs         OrderStageLog[] @relation("LogChangedBy")
   sessions          Session[]
 
   @@index([role])
@@ -244,11 +245,12 @@ model OrderStageLog {
   orderId    String
   fromStatus OrderStatus?
   toStatus   OrderStatus
-  changedBy  String
+  changedById String
   notes      String?
   createdAt  DateTime     @default(now())
 
-  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  order     Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  changedBy User  @relation("LogChangedBy", fields: [changedById], references: [id])
 
   @@index([orderId])
 }

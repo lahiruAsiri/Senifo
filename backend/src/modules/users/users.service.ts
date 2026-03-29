@@ -1,6 +1,6 @@
 import bcrypt from 'bcrypt';
 import { prisma } from '../../config/database';
-import type { CreateUserInput, UpdateUserInput } from '../../../../shared/schemas/user.schema';
+import type { CreateUserInput, UpdateUserInput } from '../../schemas/user.schema';
 import { Role } from '@prisma/client';
 
 const USER_SELECT = {

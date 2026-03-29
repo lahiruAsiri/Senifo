@@ -73,14 +73,14 @@ export default function CoordinatorDashboard() {
           <CardContent>
             <div className="rounded-md border dark:border-slate-800">
               <Table>
-                <TableHead>
+                <TableHeader>
                   <TableRow className="bg-slate-50 dark:bg-slate-800/50">
                     <TableHead>Order #</TableHead>
                     <TableHead>Client</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead className="text-right">Action</TableHead>
                   </TableRow>
-                </TableHead>
+                </TableHeader>
                 <TableBody>
                   {orders?.map((order: any) => (
                     <TableRow key={order.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">

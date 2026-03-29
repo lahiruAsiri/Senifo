@@ -1,5 +1,5 @@
 import { prisma } from '../../config/database';
-import { CreateServiceInput, UpdateServiceInput } from '../../../../shared/schemas/service.schema';
+import { CreateServiceInput, UpdateServiceInput } from '../../schemas/service.schema';
 
 export class PrintingServicesService {
   async findAll() {

@@ -2,7 +2,7 @@ import { prisma } from '../../config/database';
 import { OrderStatus, Role } from '@prisma/client';
 import { generateOrderNumber } from '../../utils/orderNumber';
 import { calculateProfit } from '../../utils/profitCalc';
-import type { CreateOrderInput, StageTransitionInput, AddOrderExpenseInput, ListOrdersQuery } from '../../../../shared/schemas/order.schema';
+import type { CreateOrderInput, StageTransitionInput, AddOrderExpenseInput, ListOrdersQuery } from '../../schemas/order.schema';
 
 const ORDER_INCLUDE = {
   client: true,
@@ -11,7 +11,10 @@ const ORDER_INCLUDE = {
   designer: { select: { id: true, name: true, email: true, role: true } },
   productionUser: { select: { id: true, name: true, email: true, role: true } },
   orderImages: true,
-  stageLogs: { orderBy: { createdAt: 'asc' as const } },
+  stageLogs: { 
+    orderBy: { createdAt: 'asc' as const },
+    include: { changedBy: { select: { name: true, role: true } } }
+  },
   tickets: { include: { raisedBy: { select: { id: true, name: true, role: true } } } },
   stageExpenses: { include: { recordedByUser: { select: { name: true } } } },
 };
@@ -236,7 +239,7 @@ export class OrdersService {
           orderId: id,
           fromStatus: order.status,
           toStatus: input.toStatus,
-          changedBy: userId,
+          changedById: userId,
           notes: input.notes,
         },
       });
@@ -252,6 +255,7 @@ export class OrdersService {
   async getTimeline(orderId: string) {
     return prisma.orderStageLog.findMany({
       where: { orderId },
+      include: { changedBy: { select: { name: true, role: true } } },
       orderBy: { createdAt: 'asc' },
     });
   }

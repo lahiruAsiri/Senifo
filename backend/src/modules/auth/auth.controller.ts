@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { authService } from './auth.service';
-import { LoginInput } from './auth.schema';
+import { LoginInput } from '../../schemas/auth.schema';
 
 const ACCESS_TTL_MS = 15 * 60 * 1000;
 const REFRESH_TTL_MS = 7 * 24 * 60 * 60 * 1000;

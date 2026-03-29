@@ -3,7 +3,7 @@ import { usersController } from './users.controller';
 import { authenticate } from '../../middleware/auth';
 import { requireRole } from '../../middleware/rbac';
 import { validateBody } from '../../middleware/validate';
-import { createUserSchema, updateUserSchema, changeRoleSchema } from '../../../../shared/schemas/user.schema';
+import { createUserSchema, updateUserSchema, changeRoleSchema } from '../../schemas/user.schema';
 import { auditLog } from '../../middleware/audit';
 
 const router = Router();

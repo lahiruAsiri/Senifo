@@ -1,5 +1,5 @@
 import { prisma } from '../../config/database';
-import { MonthlyCapacityInput } from '../../../../shared/schemas/capacity.schema';
+import { MonthlyCapacityInput } from '../../schemas/capacity.schema';
 
 export class CapacityModuleService {
   async getAvailability(year: number, month: number) {

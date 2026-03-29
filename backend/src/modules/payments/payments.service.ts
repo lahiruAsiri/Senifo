@@ -1,6 +1,6 @@
 import { prisma } from '../../config/database';
 import { PaymentType } from '@prisma/client';
-import type { RecordPaymentInput } from '../../../../shared/schemas/payment.schema';
+import type { RecordPaymentInput } from '../../schemas/payment.schema';
 
 export class PaymentsService {
   async findAll(cursor?: string, take = 20) {

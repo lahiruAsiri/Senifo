@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { paymentsService } from './payments.service';
-import { recordPaymentSchema } from '../../../../shared/schemas/payment.schema';
+import { recordPaymentSchema } from '../../schemas/payment.schema';
 
 export class PaymentsController {
   async list(req: Request, res: Response, next: NextFunction) {

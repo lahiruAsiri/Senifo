@@ -1,5 +1,5 @@
 import { prisma } from '../../config/database';
-import type { CreateClientInput } from '../../../../shared/schemas/client.schema';
+import type { CreateClientInput } from '../../schemas/client.schema';
 
 export class ClientsService {
   async findAll(search?: string, cursor?: string, take = 20) {

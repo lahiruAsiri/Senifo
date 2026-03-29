@@ -3,7 +3,7 @@ import { clientsController } from './clients.controller';
 import { authenticate } from '../../middleware/auth';
 import { requireRole } from '../../middleware/rbac';
 import { validateBody } from '../../middleware/validate';
-import { createClientSchema, updateClientSchema } from '../../../../shared/schemas/client.schema';
+import { createClientSchema, updateClientSchema } from '../../schemas/client.schema';
 import { auditLog } from '../../middleware/audit';
 
 const router = Router();

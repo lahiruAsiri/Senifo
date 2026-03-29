@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { capacityModuleService } from './capacity.service';
-import { monthlyCapacitySchema, updateCapacitySchema, availabilityQuerySchema } from '../../../../shared/schemas/capacity.schema';
+import { monthlyCapacitySchema, updateCapacitySchema, availabilityQuerySchema } from '../../schemas/capacity.schema';
 
 export class CapacityController {
   async getAvailability(req: Request, res: Response, next: NextFunction) {

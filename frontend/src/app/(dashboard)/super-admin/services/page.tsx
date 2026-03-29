@@ -50,7 +50,7 @@ export default function ServiceManagement() {
                  <div className="grid grid-cols-1 md:grid-cols-4 border-b dark:border-slate-800">
                     <div className="p-6 border-r dark:border-slate-800">
                        <p className="text-[10px] text-slate-400 font-bold uppercase mb-2">Internal Actual Cost</p>
-                       <p className="text-xl font-black text-rose-500">LKR {service.pricingTiers[0]?.actualCostPerUnit.toLocaleString()}</p>
+                       <p className="text-xl font-black text-rose-500">LKR {Number(service.pricingTiers[0]?.actualCostPerUnit).toLocaleString()}</p>
                        <p className="text-[9px] text-slate-500 mt-1 italic">Per unit base cost</p>
                     </div>
                     <div className="p-6 border-r dark:border-slate-800">
@@ -83,11 +83,13 @@ export default function ServiceManagement() {
                        </TableHeader>
                        <TableBody>
                           {service.pricingTiers.map((tier: any) => (
-                            <TableRow key={tier.id}>
-                               <TableCell className="font-bold text-xs">{tier.name}</TableCell>
-                               <TableCell className="text-xs font-black text-primary">LKR {tier.unitPrice.toLocaleString()}</TableCell>
+                             <TableRow key={tier.id}>
+                               <TableCell className="font-bold text-xs">
+                                  {tier.minQuantity}{tier.maxQuantity ? ` - ${tier.maxQuantity}` : '+'} Units
+                               </TableCell>
+                               <TableCell className="text-xs font-black text-primary">LKR {Number(tier.pricePerUnit).toLocaleString()}</TableCell>
                                <TableCell className="text-xs text-emerald-600 font-bold">
-                                  +{Math.round(((tier.unitPrice - tier.actualCostPerUnit)/tier.actualCostPerUnit)*100)}%
+                                  +{Math.round(((Number(tier.pricePerUnit) - Number(tier.actualCostPerUnit))/Number(tier.actualCostPerUnit))*100)}%
                                </TableCell>
                                <TableCell className="text-[10px] text-slate-500">Linear / Wholesaler</TableCell>
                                <TableCell className="text-right">

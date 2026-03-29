@@ -40,7 +40,7 @@ export default function StageTimeline({ logs }: { logs: StageLog[] }) {
             </div>
             <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 mb-2">
               <User size={12} />
-              <span>{log.changedBy.name} ({log.changedBy.role.replace('_', ' ')})</span>
+              <span>{log.changedBy?.name || 'Unknown'} ({log.changedBy?.role?.replace('_', ' ') || 'N/A'})</span>
             </div>
             {log.notes && (
               <div className="text-xs p-2 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-l-2 border-slate-300 dark:border-slate-700 italic">

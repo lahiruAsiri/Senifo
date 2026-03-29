@@ -1,6 +1,6 @@
 import { prisma } from '../../config/database';
 import { Role, TicketStatus } from '@prisma/client';
-import type { CreateTicketInput, AddTicketCommentInput } from '../../../../shared/schemas/ticket.schema';
+import type { CreateTicketInput, AddTicketCommentInput } from '../../schemas/ticket.schema';
 
 const TICKET_INCLUDE = {
   order: { select: { id: true, orderNumber: true, status: true } },

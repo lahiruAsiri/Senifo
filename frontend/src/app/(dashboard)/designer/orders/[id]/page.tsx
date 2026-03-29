@@ -2,8 +2,10 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useParams, useRouter } from 'next/navigation';
+import { useState } from 'react';
 import api from '@/lib/axios';
 import { Button } from '@/components/ui/button';
+import { RaiseTicketModal } from '@/components/designer/RaiseTicketModal';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import OrderStatusBadge from '@/components/shared/OrderStatusBadge';
@@ -34,6 +36,13 @@ export default function DesignerOrderStudio() {
     queryKey: ['designer-order', id],
     queryFn: async () => (await api.get(`/orders/${id}`)).data.data,
   });
+
+  const { data: tickets, isLoading: ticketsLoading } = useQuery({
+    queryKey: ['order-tickets', id],
+    queryFn: async () => (await api.get(`/tickets/order/${id}`)).data.data,
+  });
+
+  const [showTicketModal, setShowTicketModal] = useState(false);
 
   const transitionStage = useMutation({
     mutationFn: async (toStatus: string) => (await api.put(`/orders/${id}/stage`, { toStatus })).data,
@@ -123,11 +132,40 @@ export default function DesignerOrderStudio() {
              </TabsContent>
              <TabsContent value="tickets" className="mt-4">
                 <Card className="border-none shadow-sm p-6 bg-white dark:bg-slate-900">
-                   <div className="flex flex-col items-center justify-center py-12 border-2 border-dashed rounded-2xl bg-slate-50/50 dark:bg-slate-800/10">
-                      <TicketIcon size={48} className="opacity-10 mb-4" />
-                      <p className="text-sm font-medium text-slate-500 mb-6">Need clarification from the client?</p>
-                      <Button className="gap-2 shadow-lg shadow-primary/20">Raise Approval Ticket</Button>
-                   </div>
+                   {tickets && tickets.length > 0 ? (
+                     <div className="space-y-4">
+                        <div className="flex justify-between items-center mb-4">
+                           <h4 className="text-sm font-bold">Raised Tickets</h4>
+                           <Button size="sm" variant="outline" onClick={() => setShowTicketModal(true)}>New Ticket</Button>
+                        </div>
+                        <div className="divide-y dark:divide-slate-800">
+                           {tickets.map((ticket: any) => (
+                             <div key={ticket.id} className="py-3 flex items-center justify-between">
+                                <div>
+                                   <p className="text-sm font-medium">{ticket.title}</p>
+                                   <p className="text-[10px] text-slate-400">{format(new Date(ticket.createdAt), 'PPp')}</p>
+                                </div>
+                                <div className="flex items-center gap-3">
+                                   <Badge variant={ticket.status === 'RESOLVED' || ticket.status === 'CLOSED' ? 'secondary' : 'default'} className="text-[10px]">
+                                      {ticket.status.replace('_', ' ')}
+                                   </Badge>
+                                </div>
+                             </div>
+                           ))}
+                        </div>
+                     </div>
+                   ) : (
+                     <div className="flex flex-col items-center justify-center py-12 border-2 border-dashed rounded-2xl bg-slate-50/50 dark:bg-slate-800/10">
+                        <TicketIcon size={48} className="opacity-10 mb-4" />
+                        <p className="text-sm font-medium text-slate-500 mb-6">Need clarification from the client?</p>
+                        <Button 
+                          className="gap-2 shadow-lg shadow-primary/20" 
+                          onClick={() => setShowTicketModal(true)}
+                        >
+                          Raise Approval Ticket
+                        </Button>
+                     </div>
+                   )}
                 </Card>
              </TabsContent>
            </Tabs>
@@ -188,6 +226,12 @@ export default function DesignerOrderStudio() {
            </Card>
         </div>
       </div>
+      
+      <RaiseTicketModal 
+        orderId={id as string} 
+        isOpen={showTicketModal} 
+        onClose={() => setShowTicketModal(false)} 
+      />
     </div>
   );
 }

@@ -2,7 +2,7 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { prisma } from '../../config/database';
 import { env } from '../../config/env';
-import type { LoginInput } from '../../../../shared/schemas/auth.schema';
+import type { LoginInput } from '../../schemas/auth.schema';
 import { Role } from '@prisma/client';
 
 interface TokenPair {

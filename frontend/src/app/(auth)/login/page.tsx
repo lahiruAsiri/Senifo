@@ -12,7 +12,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
-import { Loader2, Eye, EyeOff } from 'lucide-react';
+import { Loader2, Eye, EyeOff, Package } from 'lucide-react';
+import Link from 'next/link';
+import { cn } from '@/lib/utils';
 
 const loginSchema = z.object({
   email: z.string().email('Invalid email address'),
@@ -40,7 +42,7 @@ export default function LoginPage() {
     try {
       const response = await api.post('/auth/login', data);
       const { user } = response.data.data;
-      
+
       setAuth(user);
       toast.success(`Welcome back, ${user.name}!`);
 
@@ -62,55 +64,84 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-slate-50 dark:bg-slate-950 p-4">
-      <Card className="w-full max-w-md shadow-xl border-slate-200 dark:border-slate-800">
-        <CardHeader className="space-y-1 text-center">
-          <CardTitle className="text-3xl font-bold tracking-tight text-primary">SENIFO</CardTitle>
-          <CardDescription className="text-slate-500 dark:text-slate-400">
-            Sign in to your management dashboard
-          </CardDescription>
-        </CardHeader>
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <CardContent className="grid gap-4">
-            <div className="grid gap-2">
-              <Label htmlFor="email">Email</Label>
+    <div className="flex min-h-screen">
+      {/* Left Side - Image */}
+      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden">
+        <img
+          src="/assets/signup-bg.jpg"
+          alt="Printing Workshop"
+          className="absolute inset-0 w-full h-full object-cover grayscale-[20%]"
+        />
+      </div>
+
+      {/* Right Side - Form */}
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 sm:p-12 lg:p-24 bg-white dark:bg-slate-950">
+        <div className="w-full max-w-md space-y-8">
+          <div className="flex">
+            <div className="bg-slate-900 dark:bg-slate-800 p-3 rounded-2xl shadow-xl shadow-slate-900/10">
+              <img src="/logo.png" alt="Senifo Logo" className="h-10 w-auto" />
+            </div>
+          </div>
+          <div className="text-center lg:text-left space-y-2">
+            <h2 className="text-3xl font-black tracking-tight flex items-center gap-2 justify-center lg:justify-start">
+              <span className="text-emerald-500">Sign</span> In
+            </h2>
+            <p className="text-slate-500 dark:text-slate-400">Welcome back! Please enter your details.</p>
+          </div>
+
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+            <div className="space-y-2">
+              <Label htmlFor="email">Email address</Label>
               <Input
                 id="email"
                 type="email"
-                placeholder="name@senifo.com"
+                placeholder="john@example.com"
                 {...register('email')}
-                className={errors.email ? 'border-destructive' : ''}
+                className={cn("h-12 bg-slate-50 dark:bg-slate-900 border-none rounded-xl", errors.email && "ring-1 ring-destructive")}
               />
               {errors.email && <p className="text-xs text-destructive">{errors.email.message}</p>}
             </div>
-            <div className="grid gap-2">
-              <Label htmlFor="password">Password</Label>
+
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <Label htmlFor="password">Password</Label>
+                <Link href="#" className="text-xs text-emerald-600 hover:text-emerald-500 font-bold underline underline-offset-4 transition-colors">
+                  Forgot Password?
+                </Link>
+              </div>
               <div className="relative">
                 <Input
                   id="password"
                   type={showPassword ? 'text' : 'password'}
+                  placeholder="••••••••"
                   {...register('password')}
-                  className={errors.password ? 'border-destructive pr-10' : 'pr-10'}
+                  className={cn("h-12 bg-slate-50 dark:bg-slate-900 border-none rounded-xl pr-12", errors.password && "ring-1 ring-destructive")}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
                 >
-                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                 </button>
               </div>
               {errors.password && <p className="text-xs text-destructive">{errors.password.message}</p>}
             </div>
-          </CardContent>
-          <CardFooter>
-            <Button className="w-full" type="submit" disabled={isLoading}>
-              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+
+            <Button className="w-full h-12 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-lg shadow-emerald-600/20 transition-all hover:scale-[1.02]" type="submit" disabled={isLoading}>
+              {isLoading && <Loader2 className="mr-2 h-5 w-5 animate-spin" />}
               Sign In
             </Button>
-          </CardFooter>
-        </form>
-      </Card>
+          </form>
+
+          <p className="text-center text-sm text-slate-500">
+            Don't have an account?{' '}
+            <Link href="/signup" className="font-bold text-emerald-600 hover:text-emerald-500 hover:underline underline-offset-4">
+              Sign up
+            </Link>
+          </p>
+        </div>
+      </div>
     </div>
   );
 }

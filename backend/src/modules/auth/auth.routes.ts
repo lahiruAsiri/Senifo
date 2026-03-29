@@ -3,7 +3,7 @@ import { authController } from './auth.controller';
 import { authenticate } from '../../middleware/auth';
 import { validateBody } from '../../middleware/validate';
 import { loginRateLimit } from '../../middleware/rateLimit';
-import { loginSchema } from '../../../../shared/schemas/auth.schema';
+import { loginSchema } from '../../schemas/auth.schema';
 
 const router = Router();
 

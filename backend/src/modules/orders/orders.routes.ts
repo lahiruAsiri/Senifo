@@ -3,7 +3,7 @@ import { ordersController } from './orders.controller';
 import { authenticate } from '../../middleware/auth';
 import { requireRole } from '../../middleware/rbac';
 import { validateBody, validateQuery } from '../../middleware/validate';
-import { createOrderSchema, updateOrderSchema, stageTransitionSchema, addOrderExpenseSchema as addExpenseSchema, listOrdersQuerySchema } from '../../../../shared/schemas/order.schema';
+import { createOrderSchema, updateOrderSchema, stageTransitionSchema, addOrderExpenseSchema as addExpenseSchema, listOrdersQuerySchema } from '../../schemas/order.schema';
 import { auditLog } from '../../middleware/audit';
 
 const router = Router();

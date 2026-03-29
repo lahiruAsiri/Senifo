@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { printingServicesService } from './services.service';
-import { createServiceSchema, updateServiceSchema } from '../../../../shared/schemas/service.schema';
+import { createServiceSchema, updateServiceSchema } from '../../schemas/service.schema';
 
 export class ServicesController {
   async list(req: Request, res: Response, next: NextFunction) {
